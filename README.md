@@ -13,6 +13,8 @@
 **To migrate from the original `babel-plugin-react-css-modules` just prefix its name in your Babel config by `@dr.pogodin/` scope, i.e.:**
 - `@dr.pogodin/babel-plugin-react-css-modules` or `@dr.pogodin/react-css-moudles` instead of `babel-plugin-react-css-modules` or `react-css-modules`.
 
+#### <a name="css-loader-compatibility"></a> Plugin compatibility with `css-loader`:
+
 | `css-loader` versions   | this plugin versions    |
 | ----------------------- | ----------------------- |
 | `5.2.4`                 | `6.1.0`                 |
@@ -20,8 +22,6 @@
 | `5.0.0` &div; `5.1.2`   | `6.0.7` &div; `6.0.11`  |
 | `4.2.0` &div; `4.3.0`   | `6.0.3` &div; `6.0.6`   |
 | `<= 3.6.0`              | [original plugin](https://www.npmjs.com/package/babel-plugin-react-css-modules)  |
-
-#### <a name="css-loader-compatibility"></a> Plugin compatibility with `css-loader`:
 
 <img src='./.README/babel-plugin-react-css-modules.png' height='150' />
 
