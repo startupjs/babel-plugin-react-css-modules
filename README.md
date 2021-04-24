@@ -23,6 +23,8 @@
 | `4.2.0` &div; `4.3.0`   | `6.0.3` &div; `6.0.6`   |
 | `<= 3.6.0`              | [original plugin](https://www.npmjs.com/package/babel-plugin-react-css-modules)  |
 
+**Original Plugin Documentation Below**
+
 <img src='./.README/babel-plugin-react-css-modules.png' height='150' />
 
 Transforms `styleName` to `className` using compile time [CSS module](#css-modules) resolution.
