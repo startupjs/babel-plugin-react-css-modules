@@ -5,7 +5,6 @@
     "@dr.pogodin/postcss-modules-parser": "^1.2.3",
     "ajv": "^8.1.0",
     "ajv-keywords": "^5.0.0",
-    "cssesc": "^3.0.0",
     "loader-utils": "^2.0.0",
     "postcss-modules": "^4.0.0",
     "postcss-modules-extract-imports": "^3.0.0",
@@ -35,7 +34,8 @@
     "postcss-scss": "^3.0.5"
   },
   "peerDependencies": {
-    "postcss": "^8.1.1"
+    "css-loader": "^5.2.4",
+    "postcss": "^8.2.12"
   },
   "engines": {
     "node": ">=12.x"
@@ -65,5 +65,5 @@
     "lint": "eslint ./src",
     "test": "npm run lint && flow && jest"
   },
-  "version": "6.0.11"
+  "version": "6.1.0"
 }
