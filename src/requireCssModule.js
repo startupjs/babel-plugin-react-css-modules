@@ -13,7 +13,9 @@ import ExtractImports from 'postcss-modules-extract-imports';
 import LocalByDefault from 'postcss-modules-local-by-default';
 import newScopePlugin from 'postcss-modules-scope';
 import Values from 'postcss-modules-values';
-import getLocalIdent from './getLocalIdent';
+import getLocalIdent, {
+  unescape,
+} from './getLocalIdent';
 import optionsDefaults from './schemas/optionsDefaults';
 import type {
   GenerateScopedNameConfigurationType,
@@ -114,7 +116,7 @@ export default (cssSourceFilePath: string, options: OptionsType): StyleModuleMap
       return getLocalIdent(
         {resourcePath},
         options.generateScopedName || optionsDefaults.generateScopedName,
-        clazz,
+        unescape(clazz),
         {
           context: options.context || process.cwd(),
           hashPrefix: '',
