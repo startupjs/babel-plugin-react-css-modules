@@ -5,13 +5,16 @@
 ![Latest NPM Release](https://img.shields.io/npm/v/@dr.pogodin/babel-plugin-react-css-modules.svg)
 ![NPM Downloads](https://img.shields.io/npm/dm/@dr.pogodin/babel-plugin-react-css-modules.svg)
 
-**This is an up-to-date version of [`babel-plugin-react-css-modules`](https://www.npmjs.com/package/babel-plugin-react-css-modules):**
+#### This is an up-to-date version of [`babel-plugin-react-css-modules`](https://www.npmjs.com/package/babel-plugin-react-css-modules):
 - It generates class names matching current `css-loader` versions (see
   [compatibility table](#css-loader-compatibility) for details).
 - All dependencies are upgraded to the latest versions.
 
-**To migrate from the original `babel-plugin-react-css-modules` just prefix its name in your Babel config by `@dr.pogodin/` scope, i.e.:**
-- `@dr.pogodin/babel-plugin-react-css-modules` or `@dr.pogodin/react-css-moudles` instead of `babel-plugin-react-css-modules` or `react-css-modules`.
+#### To migrate from the original `babel-plugin-react-css-modules`:
+- Prefix plugin name in your Babel config by `@dr.pogodin/` scope, _i.e._:
+  `@dr.pogodin/babel-plugin-react-css-modules` or `@dr.pogodin/react-css-moudles` instead of `babel-plugin-react-css-modules` or `react-css-modules`.
+- Be sure to have `webpack` installed (it is a must-to-have peer dependency
+  of this plugin starting from `v6.2.0`).
 
 #### <a name="css-loader-compatibility"></a> Plugin compatibility with `css-loader`:
 
@@ -316,6 +319,12 @@ When `babel-plugin-react-css-modules` cannot resolve CSS module at a compile tim
 npm install @dr.pogodin/babel-plugin-react-css-modules --save
 ```
 
+The plugin also relies on `webpack` as peer-dependency, be sure to have it
+installed as at least a dev dependency.
+
+```bash
+npm install webpack --save-dev
+```
 
 ### React Native
 
