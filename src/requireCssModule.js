@@ -139,11 +139,9 @@ export default (cssSourceFilePath: string, options: OptionsType): StyleModuleMap
           hashFunction: 'md4',
           hashSalt: '',
 
-          // TODO: This one is present in css-loader@6.0.0, but I am not sure
-          // where it is used "css-loader" (@6.0.0), but it does not seem to be
-          // used in the actual classname transformation, unless I am missing
-          // something.
-          // regExp: localIdentRegExp,
+          // TODO: This one allows for some path modifications during
+          // the transform. Probably, not a Webpack param.
+          regExp: '',
         },
       );
     };

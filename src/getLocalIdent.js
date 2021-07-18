@@ -287,10 +287,17 @@ export default function getLocalIdent (
     filename: path.relative(options.context, loaderContext.resourcePath),
   };
 
-  // TODO: There is not _compilation in context now, should get getPath
-  // from Webpack.
-  const ident = getPath(localIdentName, data)
-    .replace(/\[local]/gi, localName);
+  let ident = getPath(localIdentName, data).replace(/\[local]/gi, localName);
+
+  if (options.regExp) {
+    const match = resourcePath.match(options.regExp);
+
+    if (match) {
+      match.forEach((matched, i) => {
+        ident = ident.replace(new RegExp(`\\[${i}\\]`, 'ig'), matched);
+      });
+    }
+  }
 
   return escapeLocalIdent(ident);
 }
