@@ -114,12 +114,36 @@ export default (cssSourceFilePath: string, options: OptionsType): StyleModuleMap
   } else {
     generateScopedName = (clazz, resourcePath) => {
       return getLocalIdent(
+        // TODO: The loader context used by "css-loader" may has additional
+        // stuff inside this argument (loader context), allowing for some edge
+        // cases (though, presumably not with a typical configurations)
+        // we don't support (yet?).
         {resourcePath},
+
         options.generateScopedName || optionsDefaults.generateScopedName,
         unescape(clazz),
         {
           context: options.context || process.cwd(),
-          hashPrefix: '',
+
+          // TODO: These options should match their counterparts in Webpack
+          // configuration:
+          //  - https://webpack.js.org/configuration/output/#outputhashdigest
+          //  - https://webpack.js.org/configuration/output/#outputhashdigestlength
+          //  - https://webpack.js.org/configuration/output/#outputhashfunction
+          //  - https://webpack.js.org/configuration/output/#outputhashsalt
+          // and they should be exposed as babel-plugin-react-css-modules
+          // options. However, for now they are just hardcoded equal to
+          // the Webpack's default settings.
+          hashDigest: 'hex',
+          hashDigestLength: 20,
+          hashFunction: 'md4',
+          hashSalt: '',
+
+          // TODO: This one is present in css-loader@6.0.0, but I am not sure
+          // where it is used "css-loader" (@6.0.0), but it does not seem to be
+          // used in the actual classname transformation, unless I am missing
+          // something.
+          // regExp: localIdentRegExp,
         },
       );
     };

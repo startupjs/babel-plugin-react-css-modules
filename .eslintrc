@@ -5,6 +5,9 @@
   ],
   "root": true,
   "rules": {
-    "import/max-dependencies": 0
+    "import/max-dependencies": 0,
+    "lines-around-comment": 0,
+    "no-warning-comments": 0,
+    "unicorn/prevent-abbreviations": 0
   }
 }

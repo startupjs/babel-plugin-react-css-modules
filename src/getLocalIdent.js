@@ -3,9 +3,49 @@
  */
 
 import path from 'path';
-import {
-  interpolateName,
-} from 'loader-utils';
+import TemplatedPathPlugin from 'webpack/lib/TemplatedPathPlugin';
+import createHash from 'webpack/lib/util/createHash';
+
+/**
+ * Interpolates path template according to data.
+ *
+ * NOTE: The current "css-loader" relies on Webpack compilation mechanics,
+ * build around tappable plugins. Here we expose the core logic of Webpack's
+ * TemplatePathPlugin to make it usable without hooks, and Webpack's compilation
+ * object. This has pros and cons: on one hand it allows to easily keep our
+ * plugin functional in a way it worked before, on the negative side it now
+ * may be sensitive to the exact Webpack version, in addition to css-loader.
+ * Overall, it seems a reasonable solution for now.
+ *
+ * @param {string} path
+ * @param {object} data
+ * @returns {string}
+ */
+let getPath;
+{
+  // NOTE: This codeblock just exploits the current implementation of underlying
+  // TemplatedPathPlugin, see:
+  // https://github.com/webpack/webpack/blob/7102df3bb52a33529ff5db4fdf34484d2a359a49/lib/TemplatedPathPlugin.js#L308-L319
+  // It just applies the plugin to mock compiler & compilation to get access to
+  // the core logic function, which is copied to getPath() to be reused directly
+  // when needed.
+  const mockCompilation = {
+    hooks: {
+      assetPath: {
+        tap: (_, fn) => {
+          getPath = fn;
+        },
+      },
+    },
+    tap: (_, fn) => {
+      fn(mockCompilation);
+    },
+  };
+  const mockCompiler = {
+    hooks: {compilation: mockCompilation},
+  };
+  new TemplatedPathPlugin().apply(mockCompiler);
+}
 
 const filenameReservedRegex = /["*/:<>?\\|]/g;
 // eslint-disable-next-line no-control-regex
@@ -167,9 +207,14 @@ export default function getLocalIdent (
   options,
 ) {
   let relativeMatchResource = '';
-  const {context, hashPrefix} = options;
+  const {context} = options;
   const {_module: mdl, resourcePath} = loaderContext;
 
+  // TODO: This does not have any effect now, as the parent function always
+  // pass `localContext` with the only field `resourcePath`. Though, this block
+  // of code comes from `css-loader` implementation, and presumably in some
+  // cases it is important. However, as nobody has complained about related
+  // problems so far, it is probably not that important at the moment for us.
   if (mdl && mdl.matchResource) {
     relativeMatchResource = `${normalizePath(
       path.relative(context, mdl.matchResource),
@@ -180,10 +225,71 @@ export default function getLocalIdent (
     path.relative(context, resourcePath),
   );
 
-  options.content = `${hashPrefix}${relativeMatchResource}${
+  options.content = `${relativeMatchResource}${
     relativeResourcePath}\u0000${localName}`;
 
-  const ident = interpolateName(loaderContext, localIdentName, options)
+  let {
+    hashFunction,
+    hashDigest,
+    hashDigestLength,
+  } = options;
+  const mathes = localIdentName.match(
+    /\[(?:([^:\]]+):)?(hash|contenthash|fullhash)(?::([a-z]+\d*))?(?::(\d+))?]/i,
+  );
+
+  if (mathes) {
+    const hashName = mathes[2] || hashFunction;
+
+    hashFunction = mathes[1] || hashFunction;
+    hashDigest = mathes[3] || hashDigest;
+    hashDigestLength = mathes[4] || hashDigestLength;
+
+    // `hash` and `contenthash` are same in `loader-utils` context
+    // let's keep `hash` for backward compatibility
+
+    // eslint-disable-next-line no-param-reassign
+    localIdentName = localIdentName.replace(
+      /\[(?:([^:\]]+):)?(?:hash|contenthash|fullhash)(?::([a-z]+\d*))?(?::(\d+))?]/gi,
+      () => {
+        return hashName === 'fullhash' ? '[fullhash]' : '[contenthash]';
+      },
+    );
+  }
+
+  const hash = createHash(hashFunction);
+  const {hashSalt} = options;
+
+  if (hashSalt) {
+    hash.update(hashSalt);
+  }
+
+  hash.update(options.content);
+
+  const localIdentHash = hash
+    .digest(hashDigest)
+    .slice(0, hashDigestLength)
+    .replace(/[+/]/g, '_')
+    .replace(/^\d/g, '_');
+
+  // TODO need improve on webpack side, we should allow to pass
+  // hash/contentHash without chunk property, also `data` for `getPath` should
+  // be looks good without chunk property
+  const ext = path.extname(loaderContext.resourcePath);
+  const base = path.basename(loaderContext.resourcePath);
+  const name = base.slice(0, base.length - ext.length);
+  const data = {
+    chunk: {
+      contentHash: localIdentHash,
+      hash: localIdentHash,
+      name,
+    },
+    contentHash: localIdentHash,
+    filename: path.relative(options.context, loaderContext.resourcePath),
+  };
+
+  // TODO: There is not _compilation in context now, should get getPath
+  // from Webpack.
+  const ident = getPath(localIdentName, data)
     .replace(/\[local]/gi, localName);
 
   return escapeLocalIdent(ident);
