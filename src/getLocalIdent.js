@@ -293,8 +293,8 @@ export default function getLocalIdent (
     const match = resourcePath.match(options.regExp);
 
     if (match) {
-      match.forEach((matched, i) => {
-        ident = ident.replace(new RegExp(`\\[${i}\\]`, 'ig'), matched);
+      match.forEach((matched, idx) => {
+        ident = ident.replace(new RegExp(`\\[${idx}\\]`, 'ig'), matched);
       });
     }
   }
