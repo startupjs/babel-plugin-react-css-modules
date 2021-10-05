@@ -18,11 +18,5 @@ const _styleModuleImportMap = {
 };
 const styleNameA = 'a';
 const styleNameB = 'b';
-<div className={(0, _getClassName2.default)(styleNameA, _styleModuleImportMap, {
-  "autoResolveMultipleImports": true,
-  "handleMissingStyleName": "throw"
-})}></div>;
-<div className={(0, _getClassName2.default)(styleNameB, _styleModuleImportMap, {
-  "autoResolveMultipleImports": true,
-  "handleMissingStyleName": "throw"
-})}></div>;
+<div className={(0, _getClassName2.default)(styleNameA, _styleModuleImportMap)}></div>;
+<div className={(0, _getClassName2.default)(styleNameB, _styleModuleImportMap)}></div>;

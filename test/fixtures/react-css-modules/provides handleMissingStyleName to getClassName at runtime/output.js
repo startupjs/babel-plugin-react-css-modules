@@ -13,5 +13,6 @@ const _styleModuleImportMap = {
 };
 const styleNameFoo = 'a-c';
 <div className={(0, _getClassName2.default)(styleNameFoo, _styleModuleImportMap, {
+  "autoResolveMultipleImports": true,
   "handleMissingStyleName": "ignore"
 })}></div>;
