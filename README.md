@@ -21,7 +21,7 @@ allowing for a cleaner use of CSS Modules in React.
 - [Under the hood](#under-the-hood)
   - [How does it work?](#how-does-it-work)
   - [Project history](#project-history)
-  - [Migration from `babel-plugin-react-css-modules`](#migration)
+  - [Migration from `babel-plugin-react-css-modules`](##migration-from-babel-plugin-react-css-modules)
   - [`css-loader` compatibility](#css-loader-compatibility)
 
 ## Usage Examples
@@ -150,7 +150,7 @@ fine).
   ```
 
 - Add the plugin to Babel configuration:
-  ```json
+  ```js
   {
     "plugins": [
       ["@dr.pogodin/react-css-modules", {
@@ -349,7 +349,7 @@ to disable it.
 
 ## Under the hood
 
-### How does it work? {#how-does-it-work}
+### How does it work?
 
 This plugin does the following:
 1.  Builds index of all stylesheet imports per file (imports of files with
@@ -391,7 +391,7 @@ I am banned from commenting in the original project repo since I tried a little
 self-promo, trying to encourage people to switch over to my fork. If you read
 this, consider to spread the word to encourage more users to move to this fork.
 
-### Migration from `babel-plugin-react-css-modules` {#migration}
+### Migration from `babel-plugin-react-css-modules`
 
 - Prefix plugin name in your Babel config by `@dr.pogodin/` scope, _i.e._:
   `@dr.pogodin/babel-plugin-react-css-modules` or `@dr.pogodin/react-css-moudles` instead of `babel-plugin-react-css-modules` or `react-css-modules`.
