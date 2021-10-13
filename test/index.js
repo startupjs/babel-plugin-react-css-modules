@@ -64,11 +64,12 @@ afterAll((done) => {
     // A super-goofy way to compare hashes to Babel outputs.
     const names = compiledCss.match(/\.(\w|-)*/g);
     const out = fs.readFileSync(`${__dirname}/fixtures/css-loader_compatibility/generated_hashes/output.mjs`, 'utf8');
-    names.forEach((name) => {
+
+    for (const name of names) {
       if (!out.includes(`"${name.slice(1)}"`)) {
-        done(new Error('Not compatible to current css-loader'));
+        return done(new Error('Not compatible to current css-loader'));
       }
-    });
+    }
 
     done();
   });
