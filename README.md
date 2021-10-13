@@ -403,7 +403,8 @@ this, consider to spread the word to encourage more users to move to this fork.
 
 | `css-loader` versions   | this plugin versions    |
 | ----------------------- | ----------------------- |
-| `6.0.0` &div; `6.3.0` (current) | `6.2.1` - `6.3.0` (current)       |
+| `6.4.0` (latest)        | `6.4.0` (latest)        |
+| `6.0.0` &div; `6.3.0`   | `6.2.1` &div; `6.3.1`   |
 | `5.2.5` &div; `5.2.7`   | `6.1.1`                 |
 | `5.2.4`                 | `6.1.0`                 |
 | `5.1.3` &div; `5.2.3`   | `6.0.11`/`6.1.0`<sup>(1)</sup> |

@@ -206,43 +206,25 @@ export default function getLocalIdent (
   localName,
   options,
 ) {
-  let relativeMatchResource = '';
-  const {context} = options;
-  const {_module: mdl, resourcePath} = loaderContext;
-
-  // TODO: This does not have any effect now, as the parent function always
-  // pass `localContext` with the only field `resourcePath`. Though, this block
-  // of code comes from `css-loader` implementation, and presumably in some
-  // cases it is important. However, as nobody has complained about related
-  // problems so far, it is probably not that important at the moment for us.
-  if (mdl && mdl.matchResource) {
-    relativeMatchResource = `${normalizePath(
-      path.relative(context, mdl.matchResource),
-    )}\u0000`;
-  }
-
+  const {context, hashSalt} = options;
+  const {resourcePath} = loaderContext;
   const relativeResourcePath = normalizePath(
     path.relative(context, resourcePath),
   );
 
-  options.content = `${relativeMatchResource}${
-    relativeResourcePath}\u0000${localName}`;
+  options.content = `${relativeResourcePath}\u0000${localName}`;
 
-  let {
-    hashFunction,
-    hashDigest,
-    hashDigestLength,
-  } = options;
-  const mathes = localIdentName.match(
+  let {hashFunction, hashDigest, hashDigestLength} = options;
+  const matches = localIdentName.match(
     /\[(?:([^:\]]+):)?(hash|contenthash|fullhash)(?::([a-z]+\d*))?(?::(\d+))?]/i,
   );
 
-  if (mathes) {
-    const hashName = mathes[2] || hashFunction;
+  if (matches) {
+    const hashName = matches[2] || hashFunction;
 
-    hashFunction = mathes[1] || hashFunction;
-    hashDigest = mathes[3] || hashDigest;
-    hashDigestLength = mathes[4] || hashDigestLength;
+    hashFunction = matches[1] || hashFunction;
+    hashDigest = matches[3] || hashDigest;
+    hashDigestLength = matches[4] || hashDigestLength;
 
     // `hash` and `contenthash` are same in `loader-utils` context
     // let's keep `hash` for backward compatibility
@@ -256,26 +238,37 @@ export default function getLocalIdent (
     );
   }
 
-  const hash = createHash(hashFunction);
-  const {hashSalt} = options;
+  let localIdentHash = '';
 
-  if (hashSalt) {
-    hash.update(hashSalt);
+  for (let tier = 0; localIdentHash.length < hashDigestLength; tier++) {
+    const hash = createHash(hashFunction);
+
+    if (hashSalt) {
+      hash.update(hashSalt);
+    }
+
+    const tierSalt = Buffer.allocUnsafe(4);
+
+    tierSalt.writeUInt32LE(tier);
+
+    hash.update(tierSalt);
+    hash.update(options.content);
+
+    localIdentHash = (localIdentHash + hash.digest(hashDigest))
+      // Remove all leading digits
+      .replace(/^\d+/, '')
+      // Replace all slashes with underscores (same as in base64url)
+      .replace(/\//g, '_')
+      // Remove everything that is not an alphanumeric or underscore
+      .replace(/\W+/g, '')
+      .slice(0, hashDigestLength);
   }
-
-  hash.update(options.content);
-
-  const localIdentHash = hash
-    .digest(hashDigest)
-    .slice(0, hashDigestLength)
-    .replace(/[+/]/g, '_')
-    .replace(/^\d/g, '_');
 
   // TODO need improve on webpack side, we should allow to pass
   // hash/contentHash without chunk property, also `data` for `getPath` should
   // be looks good without chunk property
-  const ext = path.extname(loaderContext.resourcePath);
-  const base = path.basename(loaderContext.resourcePath);
+  const ext = path.extname(resourcePath);
+  const base = path.basename(resourcePath);
   const name = base.slice(0, base.length - ext.length);
   const data = {
     chunk: {
@@ -284,10 +277,29 @@ export default function getLocalIdent (
       name,
     },
     contentHash: localIdentHash,
-    filename: path.relative(options.context, loaderContext.resourcePath),
+    filename: path.relative(context, resourcePath),
   };
 
   let ident = getPath(localIdentName, data).replace(/\[local]/gi, localName);
+
+  if (/\[folder]/gi.test(ident)) {
+    const dirname = path.dirname(resourcePath);
+    let directory = normalizePath(
+      path.relative(context, `${dirname + path.sep}_`),
+    );
+
+    directory = directory.slice();
+
+    let folder = '';
+
+    if (directory.length > 1) {
+      folder = path.basename(directory);
+    }
+
+    ident = ident.replace(/\[folder]/gi, () => {
+      return folder;
+    });
+  }
 
   if (options.regExp) {
     const match = resourcePath.match(options.regExp);
