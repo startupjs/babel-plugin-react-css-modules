@@ -1,5 +1,5 @@
 const path = require('path');
-const { generateScopedNameFactory } = require('../../../../utils');
+const { generateScopedNameFactory } = require('../../../../src/utils');
 
 module.exports = {
   plugins: [

@@ -5,7 +5,7 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import webpack from 'webpack';
 import {
   getLocalIdent,
-} from '../utils';
+} from '../src/utils';
 
 // This is a rough draft for a css-compatibility test.
 

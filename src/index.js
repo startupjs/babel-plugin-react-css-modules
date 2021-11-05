@@ -8,6 +8,7 @@ import babelPluginJsxSyntax from '@babel/plugin-syntax-jsx';
 import BabelTypes from '@babel/types';
 import Ajv from 'ajv';
 import ajvKeywords from 'ajv-keywords';
+import 'core-js/stable'; // eslint-disable-line import/no-unassigned-import
 import attributeNameExists from './attributeNameExists';
 import createObjectExpression from './createObjectExpression';
 import createSpreadMapper from './createSpreadMapper';
