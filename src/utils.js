@@ -5,7 +5,6 @@
 // from time-to-time alter the output classnames without solid reasons.
 
 import fs from 'fs';
-import 'core-js/stable'; // eslint-disable-line import/no-unassigned-import
 import path from 'path';
 import cssesc from 'cssesc';
 import {
