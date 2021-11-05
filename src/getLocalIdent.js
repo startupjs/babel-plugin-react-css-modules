@@ -52,7 +52,7 @@ const filenameReservedRegex = /["*/:<>?\\|]/gu;
 const reControlChars = /[\u0000-\u001F\u0080-\u009F]/gu;
 
 const normalizePath = (file) => {
-  return path.sep === '\\' ? file.replaceAll('\\', '/') : file;
+  return path.sep === '\\' ? file.replace(/\\/gu, '/') : file;
 };
 
 const regexSingleEscape = /[ -,./:-@[\]^`{-~]/u;
@@ -197,7 +197,7 @@ const escapeLocalIdent = (localident) => {
       .replace(/^((-?\d)|--)/u, '_$1')
       .replace(filenameReservedRegex, '-')
       .replace(reControlChars, '-')
-      .replaceAll('.', '-'),
+      .replace(/\./gu, '-'),
   );
 };
 

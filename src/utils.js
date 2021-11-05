@@ -19,7 +19,7 @@ import {
  * @returns {string}
  */
 const normalizePath = (file) => {
-  return path.sep === '\\' ? file.replaceAll('\\', '/') : file;
+  return path.sep === '\\' ? file.replace(/\\/gu, '/') : file;
 };
 
 const filenameReservedRegex = /["*/:<>?\\|]/gu;
@@ -34,7 +34,7 @@ const escapeLocalident = (localident) => {
       .replace(/^((-?\d)|--)/u, '_$1')
       .replace(filenameReservedRegex, '-')
       .replace(reControlChars, '-')
-      .replaceAll('.', '-'),
+      .replace(/\./gu, '-'),
     {isIdentifier: true},
   );
 };
@@ -83,7 +83,7 @@ const getLocalIdent = (
     context: packageInfo.root,
   }).replace(/\[package\]/giu, packageInfo.name)
     .replace(/\[local\]/giu, localName)
-    .replaceAll(/[@+/]/gu, '-');
+    .replace(/[@+/]/gu, '-');
 };
 
 const generateScopedNameFactory = (localIdentName) => {
