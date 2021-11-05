@@ -3,8 +3,9 @@ import path from 'path';
 import runner from '@babel/helper-plugin-test-runner';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import webpack from 'webpack';
-
-import { getLocalIdent } from '../utils';
+import {
+  getLocalIdent,
+} from '../utils';
 
 // This is a rough draft for a css-compatibility test.
 
@@ -21,7 +22,7 @@ const compilerA = webpack({
   mode: 'production',
   module: {
     rules: [{
-      test: /\.css$/,
+      test: /\.css$/u,
       // type: 'asset/resource',
       use: [
         MiniCssExtractPlugin.loader,
@@ -55,7 +56,7 @@ const compilerB = webpack({
   mode: 'production',
   module: {
     rules: [{
-      test: /\.css$/,
+      test: /\.css$/u,
       // type: 'asset/resource',
       use: [
         MiniCssExtractPlugin.loader,
@@ -63,10 +64,10 @@ const compilerB = webpack({
           loader: 'css-loader',
           options: {
             modules: {
+              getLocalIdent,
               // A very goofy way to set the template which is used in the test
               // on Babel side.
               localIdentName: '[path]__[local]__[hash:base64:5]',
-              getLocalIdent,
             },
           },
         },
@@ -91,7 +92,9 @@ afterAll((done) => {
   const completed = {};
   const onCompleted = (id) => {
     completed[id] = true;
-    if (completed.A && completed.B) done();
+    if (completed.A && completed.B) {
+      done();
+    }
   };
 
   compilerA.run((error, stats) => {
@@ -104,21 +107,24 @@ afterAll((done) => {
     if (asset._source) {
       asset = asset._source;
     }
+
     const compiledCss = asset._value || asset._children.map(({_value}) => {
       return _value;
     }).join('\n');
 
     // A super-goofy way to compare hashes to Babel outputs.
-    const names = compiledCss.match(/\.(\w|-)*/g);
+    const names = compiledCss.match(/\.(\w|-)*/gu);
     const out = fs.readFileSync(`${__dirname}/fixtures/css-loader_compatibility/generated_hashes/output.mjs`, 'utf8');
 
     for (const name of names) {
       if (!out.includes(`"${name.slice(1)}"`)) {
-        return done(new Error('Not compatible to current css-loader'));
+        const msg = `[A] Not compatible to current css-loader\n\nOUTPUT:\n${
+          out}\nMISSES CLASS:\n${name}`;
+        return done(new Error(msg));
       }
     }
 
-    onCompleted('A');
+    return onCompleted('A');
   });
   compilerB.run((error, stats) => {
     // A very goofy way to extract compiled CSS from Webpack compilation stats.
@@ -130,21 +136,24 @@ afterAll((done) => {
     if (asset._source) {
       asset = asset._source;
     }
+
     const compiledCss = asset._value || asset._children.map(({_value}) => {
       return _value;
     }).join('\n');
 
     // A super-goofy way to compare hashes to Babel outputs.
-    const names = compiledCss.match(/\.(\w|-)*/g);
+    const names = compiledCss.match(/\.[A-Za-z0-9_\\+-]*/gu);
     const out = fs.readFileSync(`${__dirname}/fixtures/css-loader_compatibility/stable_classnames/output.mjs`, 'utf8');
 
     for (const name of names) {
       if (!out.includes(`"${name.slice(1)}"`)) {
-        return done(new Error('Not compatible to current css-loader'));
+        const msg = `[B] Not compatible to current css-loader\n\nOUTPUT:\n${
+          out}\nMISSES CLASS:\n[${name.slice(1)}]`;
+        return done(new Error(msg));
       }
     }
 
-    onCompleted('B');
+    return onCompleted('B');
   });
 });
 

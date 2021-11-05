@@ -255,7 +255,9 @@ export default function getLocalIdent (
     tierSalt.writeUInt32LE(tier);
 
     hash.update(tierSalt);
-    hash.update(options.content);
+
+    // TODO: bug in webpack with unicode characters with strings
+    hash.update(Buffer.from(options.content, 'utf8'));
 
     localIdentHash = (localIdentHash + hash.digest(hashDigest))
       // Remove all leading digits

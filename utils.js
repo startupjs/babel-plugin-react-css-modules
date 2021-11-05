@@ -83,7 +83,7 @@ const getLocalIdent = (
     context: packageInfo.root,
   }).replace(/\[package\]/giu, packageInfo.name)
     .replace(/\[local\]/giu, localName)
-    .replaceAll('@', '-');
+    .replaceAll(/[@+/]/gu, '-');
 };
 
 const generateScopedNameFactory = (localIdentName) => {
