@@ -47,17 +47,18 @@ let getPath;
   new TemplatedPathPlugin().apply(mockCompiler);
 }
 
-const filenameReservedRegex = /["*/:<>?\\|]/g;
+const filenameReservedRegex = /["*/:<>?\\|]/gu;
 // eslint-disable-next-line no-control-regex
-const reControlChars = /[\u0000-\u001f\u0080-\u009f]/g;
+const reControlChars = /[\u0000-\u001F\u0080-\u009F]/gu;
 
 const normalizePath = (file) => {
-  return path.sep === '\\' ? file.replace(/\\/g, '/') : file;
+  return path.sep === '\\' ? file.replaceAll('\\', '/') : file;
 };
 
-const regexSingleEscape = /[ -,./:-@[\]^`{-~]/;
-const regexExcessiveSpaces =
-  /(^|\\+)?(\\[\dA-F]{1,6}) (?![\d A-Fa-f])/g;
+const regexSingleEscape = /[ -,./:-@[\]^`{-~]/u;
+
+// eslint-disable-next-line unicorn/no-unsafe-regex
+const regexExcessiveSpaces = /(^|\\+)?(\\[\dA-F]{1,6}) (?![\d A-Fa-f])/gu;
 
 const escape = (string) => {
   let output = '';
@@ -69,7 +70,7 @@ const escape = (string) => {
     let value;
 
     // eslint-disable-next-line no-control-regex
-    if (/[\t\n\u000B\f\r]/.test(character)) {
+    if (/[\t\n\u000B\f\r]/u.test(character)) {
       const codePoint = character.charCodeAt();
 
       value = `\\${codePoint.toString(16).toUpperCase()} `;
@@ -84,9 +85,9 @@ const escape = (string) => {
 
   const firstChar = string.charAt(0);
 
-  if (/^-[\d-]/.test(output)) {
+  if (/^-[\d-]/u.test(output)) {
     output = `\\-${output.slice(1)}`;
-  } else if (/\d/.test(firstChar)) {
+  } else if (/\d/u.test(firstChar)) {
     output = `\\3${firstChar} ${output.slice(1)}`;
   }
 
@@ -193,10 +194,10 @@ const escapeLocalIdent = (localident) => {
     localident
 
       // For `[hash]` placeholder
-      .replace(/^((-?\d)|--)/, '_$1')
+      .replace(/^((-?\d)|--)/u, '_$1')
       .replace(filenameReservedRegex, '-')
       .replace(reControlChars, '-')
-      .replace(/\./g, '-'),
+      .replaceAll('.', '-'),
   );
 };
 
@@ -216,7 +217,8 @@ export default function getLocalIdent (
 
   let {hashFunction, hashDigest, hashDigestLength} = options;
   const matches = localIdentName.match(
-    /\[(?:([^:\]]+):)?(hash|contenthash|fullhash)(?::([a-z]+\d*))?(?::(\d+))?]/i,
+    // eslint-disable-next-line unicorn/no-unsafe-regex
+    /\[(?:([^:\]]+):)?(?:(hash|contenthash|fullhash))(?::([a-z]+\d*))?(?::(\d+))?\]/iu,
   );
 
   if (matches) {
@@ -231,7 +233,8 @@ export default function getLocalIdent (
 
     // eslint-disable-next-line no-param-reassign
     localIdentName = localIdentName.replace(
-      /\[(?:([^:\]]+):)?(?:hash|contenthash|fullhash)(?::([a-z]+\d*))?(?::(\d+))?]/gi,
+      // eslint-disable-next-line unicorn/no-unsafe-regex
+      /\[(?:([^:\]]+):)?(?:hash|contenthash|fullhash)(?::([a-z]+\d*))?(?::(\d+))?\]/giu,
       () => {
         return hashName === 'fullhash' ? '[fullhash]' : '[contenthash]';
       },
@@ -256,11 +259,11 @@ export default function getLocalIdent (
 
     localIdentHash = (localIdentHash + hash.digest(hashDigest))
       // Remove all leading digits
-      .replace(/^\d+/, '')
+      .replace(/^\d+/u, '')
       // Replace all slashes with underscores (same as in base64url)
-      .replace(/\//g, '_')
+      .replace(/\//gu, '_')
       // Remove everything that is not an alphanumeric or underscore
-      .replace(/\W+/g, '')
+      .replace(/\W+/gu, '')
       .slice(0, hashDigestLength);
   }
 
@@ -280,9 +283,9 @@ export default function getLocalIdent (
     filename: path.relative(context, resourcePath),
   };
 
-  let ident = getPath(localIdentName, data).replace(/\[local]/gi, localName);
+  let ident = getPath(localIdentName, data).replace(/\[local\]/giu, localName);
 
-  if (/\[folder]/gi.test(ident)) {
+  if (/\[folder\]/giu.test(ident)) {
     const dirname = path.dirname(resourcePath);
     let directory = normalizePath(
       path.relative(context, `${dirname + path.sep}_`),
@@ -296,7 +299,7 @@ export default function getLocalIdent (
       folder = path.basename(directory);
     }
 
-    ident = ident.replace(/\[folder]/gi, () => {
+    ident = ident.replace(/\[folder\]/giu, () => {
       return folder;
     });
   }
@@ -305,9 +308,9 @@ export default function getLocalIdent (
     const match = resourcePath.match(options.regExp);
 
     if (match) {
-      match.forEach((matched, idx) => {
-        ident = ident.replace(new RegExp(`\\[${idx}\\]`, 'ig'), matched);
-      });
+      for (const [idx, matched] of match.entries()) {
+        ident = ident.replace(new RegExp(`\\[${idx}\\]`, 'igu'), matched);
+      }
     }
   }
 

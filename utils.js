@@ -4,7 +4,7 @@
 // plugin, to be independent of internal `css-loader` changes that
 // from time-to-time alter the output classnames without solid reasons.
 
-/* eslint-disable import/no-commonjs, import/unambiguous */
+/* eslint-disable import/no-commonjs */
 
 const fs = require('fs');
 const path = require('path');
@@ -19,22 +19,22 @@ const {interpolateName} = require('loader-utils');
  * @returns {string}
  */
 const normalizePath = (file) => {
-  return path.sep === '\\' ? file.replace(/\\/g, '/') : file;
+  return path.sep === '\\' ? file.replaceAll('\\', '/') : file;
 };
 
-const filenameReservedRegex = /["*/:<>?\\|]/g;
+const filenameReservedRegex = /["*/:<>?\\|]/gu;
 
 // eslint-disable-next-line no-control-regex
-const reControlChars = /[\u0000-\u001f\u0080-\u009f]/g;
+const reControlChars = /[\u0000-\u001F\u0080-\u009F]/gu;
 
 const escapeLocalident = (localident) => {
   return cssesc(
     localident
       // For `[hash]` placeholder
-      .replace(/^((-?\d)|--)/, '_$1')
+      .replace(/^((-?\d)|--)/u, '_$1')
       .replace(filenameReservedRegex, '-')
       .replace(reControlChars, '-')
-      .replace(/\./g, '-'),
+      .replaceAll('.', '-'),
     {isIdentifier: true},
   );
 };
@@ -63,6 +63,7 @@ const getPackageInfo = (folder) => {
 
   return res;
 };
+
 getPackageInfo.cache = {};
 
 const getLocalIdent = (
@@ -80,9 +81,9 @@ const getLocalIdent = (
     ...options,
     content: `${packageInfo.name + request}\u0000${localName}`,
     context: packageInfo.root,
-  }).replace(/\[package]/gi, packageInfo.name)
-    .replace(/\[local]/gi, localName)
-    .replace(/@/g, '-');
+  }).replace(/\[package\]/giu, packageInfo.name)
+    .replace(/\[local\]/giu, localName)
+    .replaceAll('@', '-');
 };
 
 const generateScopedNameFactory = (localIdentName) => {

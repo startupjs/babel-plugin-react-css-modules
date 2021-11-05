@@ -22,7 +22,7 @@ const createSpreadMapper = (path: *, stats: *): {
   let {attributeNames} = optionsDefaults;
 
   if (stats.opts && stats.opts.attributeNames) {
-    attributeNames = Object.assign({}, attributeNames, stats.opts.attributeNames);
+    attributeNames = {...attributeNames, ...stats.opts.attributeNames};
   }
 
   const attributes = Object

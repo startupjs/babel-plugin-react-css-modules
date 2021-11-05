@@ -5,10 +5,10 @@ import optionsDefaults from './schemas/optionsDefaults';
 const attributeNameExists = (programPath: *, stats: *): boolean => {
   let exists = false;
 
-  let attributeNames = optionsDefaults.attributeNames;
+  let {attributeNames} = optionsDefaults;
 
   if (stats.opts && stats.opts.attributeNames) {
-    attributeNames = Object.assign({}, attributeNames, stats.opts.attributeNames);
+    attributeNames = {...attributeNames, ...stats.opts.attributeNames};
   }
 
   programPath.traverse({

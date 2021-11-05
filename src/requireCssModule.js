@@ -24,6 +24,7 @@ import type {
 
 /* eslint-disable flowtype/no-mixed */
 type PluginType = string | $ReadOnlyArray<[string, mixed]>;
+
 /* eslint-enable flowtype/no-mixed */
 
 type FiletypeOptionsType = {|
@@ -38,6 +39,7 @@ type FiletypesConfigurationType = {
 
 /* eslint-disable flowtype/no-weak-types */
 type SyntaxType = Function | Object;
+
 /* eslint-enable flowtype/no-weak-types */
 
 type OptionsType = {|
@@ -93,12 +95,11 @@ const getTokens = (runner, cssSourceFilePath: string, filetypeOptions: ?Filetype
   const lazyResult = runner
     .process(readFileSync(cssSourceFilePath, 'utf-8'), options);
 
-  lazyResult
-    .warnings()
-    .forEach((message) => {
-      // eslint-disable-next-line no-console
-      console.warn(message.text);
-    });
+  for (const message of lazyResult
+    .warnings()) {
+    // eslint-disable-next-line no-console
+    console.warn(message.text);
+  }
 
   return lazyResult.root.tokens;
 };

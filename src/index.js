@@ -37,7 +37,7 @@ const getTargetResourcePath = (path: *, stats: *) => {
 };
 
 const isFilenameExcluded = (filename, exclude) => {
-  return filename.match(new RegExp(exclude));
+  return filename.match(new RegExp(exclude, 'u'));
 };
 
 const notForPlugin = (path: *, stats: *) => {
@@ -155,7 +155,7 @@ export default ({
           return;
         }
 
-        const filename = stats.file.opts.filename;
+        const {filename} = stats.file.opts;
         const targetResourcePath = getTargetResourcePath(path, stats);
 
         let styleImportName: string;
@@ -191,16 +191,16 @@ export default ({
           return;
         }
 
-        const filename = stats.file.opts.filename;
+        const {filename} = stats.file.opts;
 
         if (stats.opts.exclude && isFilenameExcluded(filename, stats.opts.exclude)) {
           return;
         }
 
-        let attributeNames = optionsDefaults.attributeNames;
+        let {attributeNames} = optionsDefaults;
 
         if (stats.opts && stats.opts.attributeNames) {
-          attributeNames = Object.assign({}, attributeNames, stats.opts.attributeNames);
+          attributeNames = {...attributeNames, ...stats.opts.attributeNames};
         }
 
         const attributes = path.node.openingElement.attributes
@@ -268,7 +268,7 @@ export default ({
           throw new Error('Invalid configuration');
         }
 
-        const filename = stats.file.opts.filename;
+        const {filename} = stats.file.opts;
 
         filenameMap[filename] = {
           styleModuleImportMap: {},
