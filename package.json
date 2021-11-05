@@ -36,7 +36,7 @@
     "webpack": "^5.62.1"
   },
   "peerDependencies": {
-    "css-loader": "^6.4.0",
+    "css-loader": "^6.5.1",
     "postcss": "^8.3.11",
     "webpack": "^5.62.1"
   },
