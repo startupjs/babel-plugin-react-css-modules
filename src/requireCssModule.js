@@ -82,7 +82,12 @@ const getExtraPlugins = (filetypeOptions: ?FiletypeOptionsType): $ReadOnlyArray<
   });
 };
 
-const getTokens = (runner, cssSourceFilePath: string, filetypeOptions: ?FiletypeOptionsType): StyleModuleMapType => {
+const getTokens = (
+  extraPluginsRunner,
+  runner,
+  cssSourceFilePath: string,
+  filetypeOptions: ?FiletypeOptionsType,
+): StyleModuleMapType => {
   // eslint-disable-next-line flowtype/no-weak-types
   const options: Object = {
     from: cssSourceFilePath,
@@ -92,16 +97,21 @@ const getTokens = (runner, cssSourceFilePath: string, filetypeOptions: ?Filetype
     options.syntax = getSyntax(filetypeOptions);
   }
 
-  const lazyResult = runner
-    .process(readFileSync(cssSourceFilePath, 'utf-8'), options);
+  let res = readFileSync(cssSourceFilePath, 'utf-8');
 
-  for (const message of lazyResult
+  if (extraPluginsRunner) {
+    res = extraPluginsRunner.process(res, options);
+  }
+
+  res = runner.process(res, options);
+
+  for (const message of res
     .warnings()) {
     // eslint-disable-next-line no-console
     console.warn(message.text);
   }
 
-  return lazyResult.root.tokens;
+  return res.root.tokens;
 };
 
 export default (cssSourceFilePath: string, options: OptionsType): StyleModuleMapType => {
@@ -154,13 +164,14 @@ export default (cssSourceFilePath: string, options: OptionsType): StyleModuleMap
     const fromDirectoryPath = dirname(from);
     const toPath = resolve(fromDirectoryPath, to);
 
-    return getTokens(runner, toPath, filetypeOptions);
+    return getTokens(undefined, runner, toPath, filetypeOptions);
   };
 
   const extraPlugins = getExtraPlugins(filetypeOptions);
 
+  const extraPluginsRunner = extraPlugins.length && postcss(extraPlugins);
+
   const plugins = [
-    ...extraPlugins,
     Values,
     LocalByDefault,
     ExtractImports,
@@ -174,5 +185,10 @@ export default (cssSourceFilePath: string, options: OptionsType): StyleModuleMap
 
   runner = postcss(plugins);
 
-  return getTokens(runner, cssSourceFilePath, filetypeOptions);
+  return getTokens(
+    extraPluginsRunner,
+    runner,
+    cssSourceFilePath,
+    filetypeOptions,
+  );
 };
