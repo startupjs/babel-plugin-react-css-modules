@@ -117,7 +117,6 @@ const getTokens = (
 export default (cssSourceFilePath: string, options: OptionsType): StyleModuleMapType => {
   // eslint-disable-next-line prefer-const
   let runner;
-
   let generateScopedName;
 
   if (options.generateScopedName && typeof options.generateScopedName === 'function') {
@@ -160,16 +159,15 @@ export default (cssSourceFilePath: string, options: OptionsType): StyleModuleMap
 
   const filetypeOptions = getFiletypeOptions(cssSourceFilePath, options.filetypes);
 
+  const extraPlugins = getExtraPlugins(filetypeOptions);
+  const extraPluginsRunner = extraPlugins.length && postcss(extraPlugins);
+
   const fetch = (to: string, from: string) => {
     const fromDirectoryPath = dirname(from);
     const toPath = resolve(fromDirectoryPath, to);
 
-    return getTokens(undefined, runner, toPath, filetypeOptions);
+    return getTokens(extraPluginsRunner, runner, toPath, filetypeOptions);
   };
-
-  const extraPlugins = getExtraPlugins(filetypeOptions);
-
-  const extraPluginsRunner = extraPlugins.length && postcss(extraPlugins);
 
   const plugins = [
     Values,
