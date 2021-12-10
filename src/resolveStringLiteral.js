@@ -14,7 +14,8 @@ import type {
 } from './types';
 
 /**
- * Updates the className value of a JSX element using a provided styleName attribute.
+ * Updates the className value of a JSX element using a provided
+ * styleName attribute.
  */
 export default (
   path: *,
@@ -23,28 +24,35 @@ export default (
   destinationName: string,
   options: GetClassNameOptionsType,
 ): void => {
-  const resolvedStyleName = getClassName(sourceAttribute.value.value, styleModuleImportMap, options);
+  const resolvedStyleName = getClassName(
+    sourceAttribute.value.value,
+    styleModuleImportMap,
+    options,
+  );
 
   const destinationAttribute = path.node.openingElement.attributes
-    .find((attribute) => {
-      return typeof attribute.name !== 'undefined' && attribute.name.name === destinationName;
-    });
+    .find((attribute) => typeof attribute.name !== 'undefined' && attribute.name.name === destinationName);
 
   if (destinationAttribute) {
     if (isStringLiteral(destinationAttribute.value)) {
-      destinationAttribute.value.value += ' ' + resolvedStyleName;
+      destinationAttribute.value.value += ` ${resolvedStyleName}`;
     } else if (isJSXExpressionContainer(destinationAttribute.value)) {
       destinationAttribute.value.expression = conditionalClassMerge(
         destinationAttribute.value.expression,
         stringLiteral(resolvedStyleName),
       );
     } else {
-      throw new Error('Unexpected attribute value:' + destinationAttribute.value);
+      throw new Error(`Unexpected attribute value:${destinationAttribute.value}`);
     }
 
-    path.node.openingElement.attributes.splice(path.node.openingElement.attributes.indexOf(sourceAttribute), 1);
+    path.node.openingElement.attributes.splice(
+      path.node.openingElement.attributes.indexOf(sourceAttribute),
+      1,
+    );
   } else {
+    /* eslint-disable no-param-reassign */
     sourceAttribute.name.name = destinationName;
     sourceAttribute.value.value = resolvedStyleName;
+    /* eslint-enable no-param-reassign */
   }
 };

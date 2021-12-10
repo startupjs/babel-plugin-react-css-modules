@@ -16,9 +16,7 @@ const handleSpreadClassName = (
   classNamesFromSpread: typeof Expression,
 ) => {
   const destinationAttribute = path.node.openingElement.attributes
-    .find((attribute) => {
-      return typeof attribute.name !== 'undefined' && attribute.name.name === destinationName;
-    });
+    .find((attribute) => typeof attribute.name !== 'undefined' && attribute.name.name === destinationName);
 
   if (!destinationAttribute) {
     return;

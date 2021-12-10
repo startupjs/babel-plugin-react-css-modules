@@ -18,26 +18,22 @@ import {
  * @param {string} file
  * @returns {string}
  */
-const normalizePath = (file) => {
-  return path.sep === '\\' ? file.replace(/\\/gu, '/') : file;
-};
+const normalizePath = (file) => (path.sep === '\\' ? file.replace(/\\/gu, '/') : file);
 
 const filenameReservedRegex = /["*/:<>?\\|]/gu;
 
 // eslint-disable-next-line no-control-regex
 const reControlChars = /[\u0000-\u001F\u0080-\u009F]/gu;
 
-const escapeLocalident = (localident) => {
-  return cssesc(
-    localident
-      // For `[hash]` placeholder
-      .replace(/^((-?\d)|--)/u, '_$1')
-      .replace(filenameReservedRegex, '-')
-      .replace(reControlChars, '-')
-      .replace(/\./gu, '-'),
-    {isIdentifier: true},
-  );
-};
+const escapeLocalident = (localident) => cssesc(
+  localident
+  // For `[hash]` placeholder
+    .replace(/^((-?\d)|--)/u, '_$1')
+    .replace(filenameReservedRegex, '-')
+    .replace(reControlChars, '-')
+    .replace(/\./gu, '-'),
+  { isIdentifier: true },
+);
 
 /**
  * Returns the name of package containing the folder; i.e. it recursively looks
@@ -52,12 +48,12 @@ const getPackageInfo = (folder) => {
   let res = getPackageInfo.cache[folder];
   if (!res) {
     const pp = path.resolve(folder, 'package.json');
-    /* eslint-disable import/no-dynamic-require */
+    /* eslint-disable global-require, import/no-dynamic-require */
     res = fs.existsSync(pp) ? {
       name: require(pp).name,
       root: folder,
     } : getPackageInfo(path.resolve(folder, '..'));
-    /* eslint-enable import/no-dynamic-require */
+    /* eslint-enable global-require, import/no-dynamic-require */
     getPackageInfo.cache[folder] = res;
   }
 
@@ -67,7 +63,7 @@ const getPackageInfo = (folder) => {
 getPackageInfo.cache = {};
 
 const getLocalIdent = (
-  {resourcePath},
+  { resourcePath },
   localIdentName,
   localName,
   options = {},
@@ -86,18 +82,14 @@ const getLocalIdent = (
     .replace(/[@+/]/gu, '-');
 };
 
-const generateScopedNameFactory = (localIdentName) => {
-  return (localName, assetPath) => {
-    return escapeLocalident(
-      getLocalIdent(
-        {resourcePath: assetPath},
-        localIdentName,
-        localName,
-        {},
-      ),
-    );
-  };
-};
+const generateScopedNameFactory = (localIdentName) => (localName, assetPath) => escapeLocalident(
+  getLocalIdent(
+    { resourcePath: assetPath },
+    localIdentName,
+    localName,
+    {},
+  ),
+);
 
 export {
   generateScopedNameFactory,

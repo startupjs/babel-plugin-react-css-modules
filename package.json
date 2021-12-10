@@ -16,6 +16,8 @@
   "devDependencies": {
     "@babel/cli": "^7.16.0",
     "@babel/core": "^7.16.0",
+    "@babel/eslint-parser": "^7.16.3",
+    "@babel/eslint-plugin": "^7.14.5",
     "@babel/helper-plugin-test-runner": "^7.16.0",
     "@babel/plugin-transform-flow-strip-types": "^7.16.0",
     "@babel/preset-env": "^7.16.4",
@@ -25,7 +27,9 @@
     "babel-plugin-tester": "^10.1.0",
     "css-loader": "^6.5.1",
     "eslint": "^8.4.1",
-    "eslint-config-canonical": "^32.46.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-flowtype": "^8.0.3",
+    "eslint-plugin-import": "^2.25.3",
     "flow-bin": "^0.166.1",
     "jest": "^27.4.4",
     "mini-css-extract-plugin": "^2.4.5",
@@ -37,8 +41,8 @@
   },
   "peerDependencies": {
     "css-loader": "^6.5.1",
-    "postcss": "^8.3.11",
-    "webpack": "^5.64.1"
+    "postcss": "^8.4.4",
+    "webpack": "^5.65.0"
   },
   "engines": {
     "node": ">=8.x"
@@ -65,8 +69,9 @@
     "build": "rm -fr ./dist && NODE_ENV=production babel ./src --out-dir ./dist --source-maps --copy-files && npm run build-helper",
     "build-helper": "mkdir -p ./dist/browser && NODE_ENV=production babel ./src/getClassName.js --out-file ./dist/browser/getClassName.js --source-maps --no-babelrc --plugins @babel/plugin-transform-modules-commonjs,@babel/plugin-transform-flow-strip-types --presets @babel/preset-env  && npm run build-schema-helper",
     "build-schema-helper": "mkdir -p ./dist/browser/schemas && NODE_ENV=production babel ./src/schemas/optionsDefaults.js --out-file ./dist/browser/schemas/optionsDefaults.js --source-maps --no-babelrc --plugins @babel/plugin-transform-modules-commonjs,@babel/plugin-transform-flow-strip-types --presets @babel/preset-env",
-    "lint": "eslint ./src ./utils.js",
-    "test": "npm run lint && flow && jest"
+    "lint": "eslint .",
+    "jest": "jest",
+    "test": "npm run lint && flow && npm run jest"
   },
-  "version": "6.5.3"
+  "version": "6.5.4"
 }

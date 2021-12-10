@@ -19,7 +19,6 @@ import type {
 
 export default (
   types: typeof BabelTypes,
-  // eslint-disable-next-line flowtype/no-weak-types
   path: Object,
   sourceAttribute: typeof JSXAttribute,
   destinationName: string,
@@ -29,15 +28,19 @@ export default (
 ): void => {
   const expressionContainerValue = sourceAttribute.value;
   const destinationAttribute = path.node.openingElement.attributes
-    .find((attribute) => {
-      return typeof attribute.name !== 'undefined' && attribute.name.name === destinationName;
-    });
+    .find((attribute) => typeof attribute.name !== 'undefined' && attribute.name.name === destinationName);
 
   if (destinationAttribute) {
-    path.node.openingElement.attributes.splice(path.node.openingElement.attributes.indexOf(destinationAttribute), 1);
+    path.node.openingElement.attributes.splice(
+      path.node.openingElement.attributes.indexOf(destinationAttribute),
+      1,
+    );
   }
 
-  path.node.openingElement.attributes.splice(path.node.openingElement.attributes.indexOf(sourceAttribute), 1);
+  path.node.openingElement.attributes.splice(
+    path.node.openingElement.attributes.indexOf(sourceAttribute),
+    1,
+  );
 
   const args = [
     expressionContainerValue.expression,
@@ -46,8 +49,8 @@ export default (
 
   // Only provide options argument if the options are something other than default
   // This helps save a few bits in the generated user code
-  if (options.handleMissingStyleName !== optionsDefaults.handleMissingStyleName ||
-    options.autoResolveMultipleImports !== optionsDefaults.autoResolveMultipleImports) {
+  if (options.handleMissingStyleName !== optionsDefaults.handleMissingStyleName
+    || options.autoResolveMultipleImports !== optionsDefaults.autoResolveMultipleImports) {
     args.push(createObjectExpression(types, options));
   }
 
@@ -63,7 +66,7 @@ export default (
         jSXExpressionContainer(
           binaryExpression(
             '+',
-            types.stringLiteral(destinationAttribute.value.value + ' '),
+            types.stringLiteral(`${destinationAttribute.value.value} `),
             styleNameExpression,
           ),
         ),
@@ -79,7 +82,7 @@ export default (
         ),
       ));
     } else {
-      throw new Error('Unexpected attribute value: ' + destinationAttribute.value);
+      throw new Error(`Unexpected attribute value: ${destinationAttribute.value}`);
     }
   } else {
     path.node.openingElement.attributes.push(jSXAttribute(

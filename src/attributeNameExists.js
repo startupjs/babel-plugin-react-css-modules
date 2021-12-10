@@ -5,14 +5,14 @@ import optionsDefaults from './schemas/optionsDefaults';
 const attributeNameExists = (programPath: *, stats: *): boolean => {
   let exists = false;
 
-  let {attributeNames} = optionsDefaults;
+  let { attributeNames } = optionsDefaults;
 
   if (stats.opts && stats.opts.attributeNames) {
-    attributeNames = {...attributeNames, ...stats.opts.attributeNames};
+    attributeNames = { ...attributeNames, ...stats.opts.attributeNames };
   }
 
   programPath.traverse({
-    JSXAttribute (attributePath: *) {
+    JSXAttribute(attributePath: *) {
       if (exists) {
         return;
       }

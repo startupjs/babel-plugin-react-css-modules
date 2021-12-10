@@ -22,7 +22,6 @@ import type {
   StyleModuleMapType,
 } from './types';
 
-/* eslint-disable flowtype/no-mixed */
 type PluginType = string | $ReadOnlyArray<[string, mixed]>;
 
 /* eslint-enable flowtype/no-mixed */
@@ -48,7 +47,10 @@ type OptionsType = {|
   context?: string,
 |};
 
-const getFiletypeOptions = (cssSourceFilePath: string, filetypes: FiletypesConfigurationType): ?FiletypeOptionsType => {
+const getFiletypeOptions = (
+  cssSourceFilePath: string,
+  filetypes: FiletypesConfigurationType,
+): ?FiletypeOptionsType => {
   const extension = cssSourceFilePath.slice(cssSourceFilePath.lastIndexOf('.'));
   const filetype = filetypes ? filetypes[extension] : null;
 
@@ -60,7 +62,7 @@ const getSyntax = (filetypeOptions: FiletypeOptionsType): ?(SyntaxType) => {
     return null;
   }
 
-  // eslint-disable-next-line import/no-dynamic-require
+  // eslint-disable-next-line global-require, import/no-dynamic-require
   return require(filetypeOptions.syntax);
 };
 
@@ -73,11 +75,11 @@ const getExtraPlugins = (filetypeOptions: ?FiletypeOptionsType): $ReadOnlyArray<
     if (Array.isArray(plugin)) {
       const [pluginName, pluginOptions] = plugin;
 
-      // eslint-disable-next-line import/no-dynamic-require
+      // eslint-disable-next-line global-require, import/no-dynamic-require
       return require(pluginName)(pluginOptions);
     }
 
-    // eslint-disable-next-line import/no-dynamic-require
+    // eslint-disable-next-line global-require, import/no-dynamic-require
     return require(plugin);
   });
 };
@@ -88,7 +90,6 @@ const getTokens = (
   cssSourceFilePath: string,
   filetypeOptions: ?FiletypeOptionsType,
 ): StyleModuleMapType => {
-  // eslint-disable-next-line flowtype/no-weak-types
   const options: Object = {
     from: cssSourceFilePath,
   };
@@ -105,11 +106,10 @@ const getTokens = (
 
   res = runner.process(res, options);
 
-  for (const message of res
-    .warnings()) {
+  res.warnings().forEach((message) => {
     // eslint-disable-next-line no-console
     console.warn(message.text);
-  }
+  });
 
   return res.root.tokens;
 };
@@ -122,39 +122,37 @@ export default (cssSourceFilePath: string, options: OptionsType): StyleModuleMap
   if (options.generateScopedName && typeof options.generateScopedName === 'function') {
     generateScopedName = options.generateScopedName;
   } else {
-    generateScopedName = (clazz, resourcePath) => {
-      return getLocalIdent(
-        // TODO: The loader context used by "css-loader" may has additional
-        // stuff inside this argument (loader context), allowing for some edge
-        // cases (though, presumably not with a typical configurations)
-        // we don't support (yet?).
-        {resourcePath},
+    generateScopedName = (clazz, resourcePath) => getLocalIdent(
+      // TODO: The loader context used by "css-loader" may has additional
+      // stuff inside this argument (loader context), allowing for some edge
+      // cases (though, presumably not with a typical configurations)
+      // we don't support (yet?).
+      { resourcePath },
 
-        options.generateScopedName || optionsDefaults.generateScopedName,
-        unescape(clazz),
-        {
-          context: options.context || process.cwd(),
+      options.generateScopedName || optionsDefaults.generateScopedName,
+      unescape(clazz),
+      {
+        context: options.context || process.cwd(),
 
-          // TODO: These options should match their counterparts in Webpack
-          // configuration:
-          //  - https://webpack.js.org/configuration/output/#outputhashdigest
-          //  - https://webpack.js.org/configuration/output/#outputhashdigestlength
-          //  - https://webpack.js.org/configuration/output/#outputhashfunction
-          //  - https://webpack.js.org/configuration/output/#outputhashsalt
-          // and they should be exposed as babel-plugin-react-css-modules
-          // options. However, for now they are just hardcoded equal to
-          // the Webpack's default settings.
-          hashDigest: 'hex',
-          hashDigestLength: 20,
-          hashFunction: 'md4',
-          hashSalt: '',
+        // TODO: These options should match their counterparts in Webpack
+        // configuration:
+        //  - https://webpack.js.org/configuration/output/#outputhashdigest
+        //  - https://webpack.js.org/configuration/output/#outputhashdigestlength
+        //  - https://webpack.js.org/configuration/output/#outputhashfunction
+        //  - https://webpack.js.org/configuration/output/#outputhashsalt
+        // and they should be exposed as babel-plugin-react-css-modules
+        // options. However, for now they are just hardcoded equal to
+        // the Webpack's default settings.
+        hashDigest: 'hex',
+        hashDigestLength: 20,
+        hashFunction: 'md4',
+        hashSalt: '',
 
-          // TODO: This one allows for some path modifications during
-          // the transform. Probably, not a Webpack param.
-          regExp: '',
-        },
-      );
-    };
+        // TODO: This one allows for some path modifications during
+        // the transform. Probably, not a Webpack param.
+        regExp: '',
+      },
+    );
   }
 
   const filetypeOptions = getFiletypeOptions(cssSourceFilePath, options.filetypes);

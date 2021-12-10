@@ -36,8 +36,9 @@ export default function Component() {
   return (
     <div className={S.container}>
       <h1 className={S.title}>Example</div>
+      <p styleName={S.text}>Sample text paragraph.</p>
       <p className={`${S.text} ${S.special}`}>
-        This is just a simple example.
+        Sample text paragraph with special style.
       </p>
     </div>
   );
@@ -62,27 +63,11 @@ export default function Component() {
 ```
 
 **With this plugin and multiple stylesheets**
-```jsx
-import S1 from './styles-01.css';
-import S2 from './styles-02.css';
 
-export default function Component() {
-  return (
-    <div styleName="S1.container">
-      <h1 styleName="S1.title">Example</div>
-      <p styleName="S1.text">Sample text paragraph.</p>
-      <p styleName="S1.text S2.special">
-        Sample text paragraph with special style.
-      </p>
-    </div>
-  );
-}
-```
-In this example the plugin understands `S1.` and `S2.` prefixes as import
-names of stylesheets from where each style should be taken.
-With `autoResolveMultipleImports` option enabled (by default), the plugin will
-resolve the correct stylesheet automatically (if possible), and the example will
-work as this, assuming each style is defined only in one of these CSS files:
+Assuming:
+- Styles `container`, `title`, and `text` are defined in `styles-01.css`.
+- Style `special` is defined in `styles-02.css`.
+- The plugin's `autoResolveMultipleImports` option is enabled (default).
 
 ```jsx
 import './styles-01.css';
@@ -94,6 +79,25 @@ export default function Component() {
       <h1 styleName="title">Example</div>
       <p styleName="text">Sample text paragraph.</p>
       <p styleName="text special">
+        Sample text paragraph with special style.
+      </p>
+    </div>
+  );
+}
+```
+If both files, `styles-01.css` and `styles-02.css` contain styles with the same
+names, thus making auto resolution impossible, this plugin allows explicit
+stylesheet prefixes:
+```jsx
+import S1 from './styles-01.css';
+import S2 from './styles-02.css';
+
+export default function Component() {
+  return (
+    <div styleName="S1.container">
+      <h1 styleName="S1.title">Example</div>
+      <p styleName="S1.text">Sample text paragraph.</p>
+      <p styleName="S1.text S2.special">
         Sample text paragraph with special style.
       </p>
     </div>

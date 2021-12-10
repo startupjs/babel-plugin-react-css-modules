@@ -19,29 +19,23 @@ const createSpreadMapper = (path: *, stats: *): {
 } => {
   const result = {};
 
-  let {attributeNames} = optionsDefaults;
+  let { attributeNames } = optionsDefaults;
 
   if (stats.opts && stats.opts.attributeNames) {
-    attributeNames = {...attributeNames, ...stats.opts.attributeNames};
+    attributeNames = { ...attributeNames, ...stats.opts.attributeNames };
   }
 
   const attributes = Object
     .entries(attributeNames)
-    .filter((pair) => {
-      return pair[1];
-    });
+    .filter((pair) => pair[1]);
 
-  const attributeKeys = attributes.map((pair) => {
-    return pair[0];
-  });
+  const attributeKeys = attributes.map((pair) => pair[0]);
 
   const spreadAttributes = path.node.openingElement.attributes
-    .filter((attribute) => {
-      return isJSXSpreadAttribute(attribute);
-    });
+    .filter((attribute) => isJSXSpreadAttribute(attribute));
 
-  for (const spread of spreadAttributes) {
-    for (const attributeKey of attributeKeys) {
+  spreadAttributes.forEach((spread) => {
+    attributeKeys.forEach((attributeKey) => {
       const destinationName = attributeNames[attributeKey];
 
       if (result[destinationName]) {
@@ -79,8 +73,8 @@ const createSpreadMapper = (path: *, stats: *): {
           stringLiteral(''),
         );
       }
-    }
-  }
+    });
+  });
 
   return result;
 };

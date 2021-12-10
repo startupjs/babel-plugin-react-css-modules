@@ -36,17 +36,16 @@ const getTargetResourcePath = (path: *, stats: *) => {
   return require.resolve(path.node.source.value);
 };
 
-const isFilenameExcluded = (filename, exclude) => {
-  return filename.match(new RegExp(exclude, 'u'));
-};
+const isFilenameExcluded = (filename, exclude) => filename.match(new RegExp(exclude, 'u'));
 
 const notForPlugin = (path: *, stats: *) => {
-  stats.opts.filetypes = stats.opts.filetypes || {};
+  const extension = path.node.source.value.lastIndexOf('.') > -1
+    ? path.node.source.value.slice(path.node.source.value.lastIndexOf('.'))
+    : null;
 
-  const extension = path.node.source.value.lastIndexOf('.') > -1 ? path.node.source.value.slice(path.node.source.value.lastIndexOf('.')) : null;
-
-  if (extension !== '.css' && !Object.keys(stats.opts.filetypes).includes(extension)) {
-    return true;
+  if (extension !== '.css') {
+    const { filetypes } = stats.opts;
+    if (!filetypes || !filetypes[extension]) return true;
   }
 
   const filename = getTargetResourcePath(path, stats);
@@ -68,9 +67,7 @@ export default ({
   let skip = false;
 
   const setupFileForRuntimeResolution = (path, filename) => {
-    const programPath = path.findParent((parentPath) => {
-      return parentPath.isProgram();
-    });
+    const programPath = path.findParent((parentPath) => parentPath.isProgram());
 
     filenameMap[filename].importedHelperIndentifier = programPath.scope.generateUidIdentifier('getClassName');
     filenameMap[filename].styleModuleImportMapIdentifier = programPath.scope.generateUidIdentifier('styleModuleImportMap');
@@ -87,9 +84,7 @@ export default ({
       ),
     );
 
-    const firstNonImportDeclarationNode = programPath.get('body').find((node) => {
-      return !types.isImportDeclaration(node);
-    });
+    const firstNonImportDeclarationNode = programPath.get('body').find((node) => !types.isImportDeclaration(node));
 
     firstNonImportDeclarationNode.insertBefore(
       types.variableDeclaration(
@@ -130,13 +125,9 @@ export default ({
       ),
     ]);
 
-    const programPath = path.findParent((parentPath) => {
-      return parentPath.isProgram();
-    });
+    const programPath = path.findParent((parentPath) => parentPath.isProgram());
 
-    const firstNonImportDeclarationNode = programPath.get('body').find((node) => {
-      return !types.isImportDeclaration(node);
-    });
+    const firstNonImportDeclarationNode = programPath.get('body').find((node) => !types.isImportDeclaration(node));
 
     const hotAcceptStatement = types.ifStatement(test, consequent);
 
@@ -150,12 +141,12 @@ export default ({
   return {
     inherits: babelPluginJsxSyntax,
     visitor: {
-      ImportDeclaration (path: *, stats: *): void {
+      ImportDeclaration(path: *, stats: *): void {
         if (skip || notForPlugin(path, stats)) {
           return;
         }
 
-        const {filename} = stats.file.opts;
+        const { filename } = stats.file.opts;
         const targetResourcePath = getTargetResourcePath(path, stats);
 
         let styleImportName: string;
@@ -172,11 +163,15 @@ export default ({
           throw new Error('Unexpected use case.');
         }
 
-        filenameMap[filename].styleModuleImportMap[styleImportName] = requireCssModule(targetResourcePath, {
-          context: stats.opts.context,
-          filetypes: stats.opts.filetypes || {},
-          generateScopedName: stats.opts.generateScopedName,
-        });
+        filenameMap[filename]
+          .styleModuleImportMap[styleImportName] = requireCssModule(
+            targetResourcePath,
+            {
+              context: stats.opts.context,
+              filetypes: stats.opts.filetypes || {},
+              generateScopedName: stats.opts.generateScopedName,
+            },
+          );
 
         if (stats.opts.webpackHotModuleReloading) {
           addWebpackHotModuleAccept(path);
@@ -186,27 +181,25 @@ export default ({
           path.remove();
         }
       },
-      JSXElement (path: *, stats: *): void {
+      JSXElement(path: *, stats: *): void {
         if (skip) {
           return;
         }
 
-        const {filename} = stats.file.opts;
+        const { filename } = stats.file.opts;
 
         if (stats.opts.exclude && isFilenameExcluded(filename, stats.opts.exclude)) {
           return;
         }
 
-        let {attributeNames} = optionsDefaults;
+        let { attributeNames } = optionsDefaults;
 
         if (stats.opts && stats.opts.attributeNames) {
-          attributeNames = {...attributeNames, ...stats.opts.attributeNames};
+          attributeNames = { ...attributeNames, ...stats.opts.attributeNames };
         }
 
         const attributes = path.node.openingElement.attributes
-          .filter((attribute) => {
-            return typeof attribute.name !== 'undefined' && typeof attributeNames[attribute.name.name] === 'string';
-          });
+          .filter((attribute) => typeof attribute.name !== 'undefined' && typeof attributeNames[attribute.name.name] === 'string');
 
         if (attributes.length === 0) {
           return;
@@ -219,7 +212,7 @@ export default ({
 
         const spreadMap = createSpreadMapper(path, stats);
 
-        for (const attribute of attributes) {
+        attributes.forEach((attribute) => {
           const destinationName = attributeNames[attribute.name.name];
 
           const options = {
@@ -258,9 +251,9 @@ export default ({
               spreadMap[destinationName],
             );
           }
-        }
+        });
       },
-      Program (path: *, stats: *): void {
+      Program(path: *, stats: *): void {
         if (!validate(stats.opts)) {
           // eslint-disable-next-line no-console
           console.error(validate.errors);
@@ -268,7 +261,7 @@ export default ({
           throw new Error('Invalid configuration');
         }
 
-        const {filename} = stats.file.opts;
+        const { filename } = stats.file.opts;
 
         filenameMap[filename] = {
           styleModuleImportMap: {},

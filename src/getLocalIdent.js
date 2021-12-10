@@ -42,7 +42,7 @@ let getPath;
     },
   };
   const mockCompiler = {
-    hooks: {compilation: mockCompilation},
+    hooks: { compilation: mockCompilation },
   };
   new TemplatedPathPlugin().apply(mockCompiler);
 }
@@ -51,13 +51,9 @@ const filenameReservedRegex = /["*/:<>?\\|]/gu;
 // eslint-disable-next-line no-control-regex
 const reControlChars = /[\u0000-\u001F\u0080-\u009F]/gu;
 
-const normalizePath = (file) => {
-  return path.sep === '\\' ? file.replace(/\\/gu, '/') : file;
-};
+const normalizePath = (file) => (path.sep === '\\' ? file.replace(/\\/gu, '/') : file);
 
 const regexSingleEscape = /[ -,./:-@[\]^`{-~]/u;
-
-// eslint-disable-next-line unicorn/no-unsafe-regex
 const regexExcessiveSpaces = /(^|\\+)?(\\[\dA-F]{1,6}) (?![\d A-Fa-f])/gu;
 
 const escape = (string) => {
@@ -116,7 +112,7 @@ const gobbleHex = (string) => {
     const code = lower.charCodeAt(index);
 
     // check to see if we are dealing with a valid hex char [a-f|0-9]
-    const valid = code >= 97 && code <= 102 || code >= 48 && code <= 57;
+    const valid = (code >= 97 && code <= 102) || (code >= 48 && code <= 57);
 
     // https://drafts.csswg.org/css-syntax/#consume-escaped-code-point
     spaceTerminated = code === 32;
@@ -137,7 +133,8 @@ const gobbleHex = (string) => {
   const isSurrogate = codePoint >= 0xD8_00 && codePoint <= 0xDF_FF;
 
   // Add special case for
-  // "If this number is zero, or is for a surrogate, or is greater than the maximum allowed code point"
+  // "If this number is zero, or is for a surrogate,
+  // or is greater than the maximum allowed code point"
   // https://drafts.csswg.org/css-syntax/#maximum-allowed-code-point
   if (isSurrogate || codePoint === 0x00_00 || codePoint > 0x10_FF_FF) {
     return ['\uFFFD', hex.length + (spaceTerminated ? 1 : 0)];
@@ -163,61 +160,50 @@ export const unescape = (string) => {
       if (gobbled !== undefined) {
         returnValue += gobbled[0];
         index += gobbled[1];
-        continue;
-      }
 
       // Retain a pair of \\ if double escaped `\\\\`
       // https://github.com/postcss/postcss-selector-parser/commit/268c9a7656fb53f543dc620aa5b73a30ec3ff20e
-      if (string[index + 1] === '\\') {
+      } else if (string[index + 1] === '\\') {
         returnValue += '\\';
         index += 1;
-        continue;
-      }
 
       // if \\ is at the end of the string retain it
       // https://github.com/postcss/postcss-selector-parser/commit/01a6b346e3612ce1ab20219acc26abdc259ccefb
-      if (string.length === index + 1) {
+      } else if (string.length === index + 1) {
         returnValue += string[index];
       }
-
-      continue;
-    }
-
-    returnValue += string[index];
+    } else returnValue += string[index];
   }
 
   return returnValue;
 };
 
-const escapeLocalIdent = (localident) => {
-  return escape(
-    localident
+const escapeLocalIdent = (localident) => escape(
+  localident
 
-      // For `[hash]` placeholder
-      .replace(/^((-?\d)|--)/u, '_$1')
-      .replace(filenameReservedRegex, '-')
-      .replace(reControlChars, '-')
-      .replace(/\./gu, '-'),
-  );
-};
+  // For `[hash]` placeholder
+    .replace(/^((-?\d)|--)/u, '_$1')
+    .replace(filenameReservedRegex, '-')
+    .replace(reControlChars, '-')
+    .replace(/\./gu, '-'),
+);
 
-export default function getLocalIdent (
+export default function getLocalIdent(
   loaderContext,
   localIdentName,
   localName,
   options,
 ) {
-  const {context, hashSalt} = options;
-  const {resourcePath} = loaderContext;
+  const { context, hashSalt } = options;
+  const { resourcePath } = loaderContext;
   const relativeResourcePath = normalizePath(
     path.relative(context, resourcePath),
   );
 
-  options.content = `${relativeResourcePath}\u0000${localName}`;
+  const content = `${relativeResourcePath}\u0000${localName}`;
 
-  let {hashFunction, hashDigest, hashDigestLength} = options;
+  let { hashFunction, hashDigest, hashDigestLength } = options;
   const matches = localIdentName.match(
-    // eslint-disable-next-line unicorn/no-unsafe-regex
     /\[(?:([^:\]]+):)?(?:(hash|contenthash|fullhash))(?::([a-z]+\d*))?(?::(\d+))?\]/iu,
   );
 
@@ -233,11 +219,8 @@ export default function getLocalIdent (
 
     // eslint-disable-next-line no-param-reassign
     localIdentName = localIdentName.replace(
-      // eslint-disable-next-line unicorn/no-unsafe-regex
       /\[(?:([^:\]]+):)?(?:hash|contenthash|fullhash)(?::([a-z]+\d*))?(?::(\d+))?\]/giu,
-      () => {
-        return hashName === 'fullhash' ? '[fullhash]' : '[contenthash]';
-      },
+      () => (hashName === 'fullhash' ? '[fullhash]' : '[contenthash]'),
     );
   }
 
@@ -257,7 +240,7 @@ export default function getLocalIdent (
     hash.update(tierSalt);
 
     // TODO: bug in webpack with unicode characters with strings
-    hash.update(Buffer.from(options.content, 'utf8'));
+    hash.update(Buffer.from(content, 'utf8'));
 
     localIdentHash = (localIdentHash + hash.digest(hashDigest))
       // Remove all leading digits
@@ -301,18 +284,16 @@ export default function getLocalIdent (
       folder = path.basename(directory);
     }
 
-    ident = ident.replace(/\[folder\]/giu, () => {
-      return folder;
-    });
+    ident = ident.replace(/\[folder\]/giu, () => folder);
   }
 
   if (options.regExp) {
     const match = resourcePath.match(options.regExp);
 
     if (match) {
-      for (const [idx, matched] of match.entries()) {
+      match.entries().forEach(([idx, matched]) => {
         ident = ident.replace(new RegExp(`\\[${idx}\\]`, 'igu'), matched);
-      }
+      });
     }
   }
 
