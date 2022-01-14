@@ -45,6 +45,9 @@
         }
       ]
     },
+    "transform": {
+      "instanceof": "Function"
+    },
     "removeImport": {
       "type": "boolean"
     },
