@@ -45,6 +45,7 @@ type OptionsType = {|
   filetypes: FiletypesConfigurationType,
   generateScopedName?: GenerateScopedNameConfigurationType,
   context?: string,
+  transform?: Function
 |};
 
 const getFiletypeOptions = (
@@ -89,6 +90,7 @@ const getTokens = (
   runner,
   cssSourceFilePath: string,
   filetypeOptions: ?FiletypeOptionsType,
+  pluginOptions: OptionsType
 ): StyleModuleMapType => {
   const options: Object = {
     from: cssSourceFilePath,
@@ -99,6 +101,10 @@ const getTokens = (
   }
 
   let res = readFileSync(cssSourceFilePath, 'utf-8');
+
+  if (pluginOptions.transform) {
+    res = pluginOptions.transform(res, cssSourceFilePath, pluginOptions)
+  }
 
   if (extraPluginsRunner) {
     res = extraPluginsRunner.process(res, options);
@@ -164,7 +170,13 @@ export default (cssSourceFilePath: string, options: OptionsType): StyleModuleMap
     const fromDirectoryPath = dirname(from);
     const toPath = resolve(fromDirectoryPath, to);
 
-    return getTokens(extraPluginsRunner, runner, toPath, filetypeOptions);
+    return getTokens(
+      extraPluginsRunner,
+      runner,
+      toPath,
+      filetypeOptions,
+      options
+    );
   };
 
   const plugins = [
@@ -186,5 +198,6 @@ export default (cssSourceFilePath: string, options: OptionsType): StyleModuleMap
     runner,
     cssSourceFilePath,
     filetypeOptions,
+    options
   );
 };
