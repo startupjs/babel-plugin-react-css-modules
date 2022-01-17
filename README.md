@@ -2,8 +2,8 @@
 
 ![Master Build Status](https://img.shields.io/circleci/project/github/birdofpreyru/babel-plugin-react-css-modules/master.svg?label=master)
 ![Dev Build Status](https://img.shields.io/circleci/project/github/birdofpreyru/babel-plugin-react-css-modules/devel.svg?label=devel)
-![Latest NPM Release](https://img.shields.io/npm/v/@dr.pogodin/babel-plugin-react-css-modules.svg)
-![NPM Downloads](https://img.shields.io/npm/dm/@dr.pogodin/babel-plugin-react-css-modules.svg)
+![Latest NPM Release](https://img.shields.io/npm/v/@startupjs/babel-plugin-react-css-modules.svg)
+![NPM Downloads](https://img.shields.io/npm/dm/@startupjs/babel-plugin-react-css-modules.svg)
 
 This [Babel] plugin for [React] transforms `styleName` attribute of
 JSX components into `className` using compile-time [CSS Modules] resolution,
@@ -145,7 +145,7 @@ fine).
   a compile-time `styleName` resolution, the plugin falls back to the runtime
   resolution).
   ```
-  npm install --save @dr.pogodin/babel-plugin-react-css-modules
+  npm install --save @startupjs/babel-plugin-react-css-modules
   ```
 
 - Install Webpack at least as a dev dependency:
@@ -157,7 +157,7 @@ fine).
   ```js
   {
     "plugins": [
-      ["@dr.pogodin/react-css-modules", {
+      ["@startupjs/react-css-modules", {
         // The default localIdentName in "css-loader" is "[hash:base64]",
         // it is highly-recommended to explicitly specify the same value
         // both here, and in "css-loader" options, including the hash length
@@ -194,7 +194,7 @@ fine).
 
   **Within Webpack Config**
   ```js
-  const { getLocalIdent } = require('@dr.pogodin/babel-plugin-react-css-modules/utils');
+  const { getLocalIdent } = require('@startupjs/babel-plugin-react-css-modules/utils');
 
   const cssLoaderOptions = {
     modules: {
@@ -206,11 +206,11 @@ fine).
 
   **Within Babel Config**
   ```js
-  const { generateScopedNameFactory } = require('@dr.pogodin/babel-plugin-react-css-modules/utils');
+  const { generateScopedNameFactory } = require('@startupjs/babel-plugin-react-css-modules/utils');
 
   module.exports = {
     plugins: [
-      ["@dr.pogodin/react-css-modules", {
+      ["@startupjs/react-css-modules", {
         generateScopedName:
           // The classname template MUST match "localIdentName" option value
           // you passed to "css-loader".
@@ -322,7 +322,7 @@ two steps:
       needed with [`postcss-scss`](https://github.com/postcss/postcss-scss)
       because SCSS already supports nesting.
 
-    Postcss plugins can have options specified by wrapping the name and an options object in an array inside your config: 
+    Postcss plugins can have options specified by wrapping the name and an options object in an array inside your config:
 
     ```json
       "plugins": [
@@ -397,8 +397,8 @@ this, consider to spread the word to encourage more users to move to this fork.
 
 ### Migration from `babel-plugin-react-css-modules`
 
-- Prefix plugin name in your Babel config by `@dr.pogodin/` scope, _i.e._:
-  `@dr.pogodin/babel-plugin-react-css-modules` or `@dr.pogodin/react-css-moudles` instead of `babel-plugin-react-css-modules` or `react-css-modules`.
+- Prefix plugin name in your Babel config by `@startupjs/` scope, _i.e._:
+  `@startupjs/babel-plugin-react-css-modules` or `@startupjs/react-css-moudles` instead of `babel-plugin-react-css-modules` or `react-css-modules`.
 
 - Be sure to have `webpack` installed (it is a must-to-have peer dependency
   of this plugin starting from `v6.2.0`).
